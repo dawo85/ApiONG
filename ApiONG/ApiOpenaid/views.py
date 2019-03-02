@@ -1,3 +1,1 @@
-from django.shortcuts import render
-
-# Create your views here.
+from ApiOpenaid.apis.api_activities import ActivitiesApi
