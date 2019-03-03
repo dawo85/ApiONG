@@ -87,7 +87,8 @@ class RegisterQueries(object):
 
 	def create(self, country, year):
 		year = str(int(year) + 1)
-		Register.create(country=country, year=year)
+		register = Register(country=country, year=year)
+		register.save()
 
 
 class UpdateData(object):
@@ -95,7 +96,7 @@ class UpdateData(object):
 	def update(self, country, year_initial, year_end, data):
 		AidMonetaryQueries().delete(year_initial, year_end, country)
 		CountryQueries().create(country, data)
-		RegisterQueries().create(country, year)
+		RegisterQueries().create(country, year_initial)
 
 
 
