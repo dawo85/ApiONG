@@ -95,7 +95,7 @@ class UpdateData(object):
 	def update(self, country, year_initial, year_end, data):
 		AidMonetaryQueries().delete(year_initial, year_end, country)
 		CountryQueries().create(country, data)
-		Register().create(country, year)
+		RegisterQueries().create(country, year)
 
 
 
