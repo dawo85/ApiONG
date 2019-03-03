@@ -9,12 +9,14 @@ from django.db import transaction
 class KeysApi(object):
 	iati_activities = 'iati-activities'
 	iati_activity = 'iati-activity'
-	budget = 'budget'
-	period_end = 'period-end'
 	iso_date = 'iso-date'
 	value = 'value'
-	currency = 'currency'
 	text = 'text'
+	provider_org ='provider-org'
+	transaction = 'transaction'
+	transaction_date = 'transaction-date'
+	ref = 'ref'
+	narrative = 'narrative'
 
 
 class AidMonetaryQueries(object):
@@ -37,13 +39,26 @@ class AidMonetaryQueries(object):
 		result = ActivitiesSerializer(list_aids).data
 		return result
 
+	def get_company_names(self, transaction):
+		company = ''
+		if KeysApi.ref in transaction[KeysApi.provider_org]:
+			company = transaction[KeysApi.provider_org][KeysApi.ref]
+		if KeysApi.narrative in transaction[KeysApi.provider_org]:
+			narrative = transaction[KeysApi.provider_org][KeysApi.narrative]
+			if type(narrative) == list:
+				narrative = narrative[0]
+			if company:
+				company += ' - '
+			company += narrative
+		return company
+
 	def create(self, country, data):
-		for budget in data:
-			if type(budget) == dict and KeysApi.period_end in budget and budget[KeysApi.period_end] and KeysApi.iso_date in budget[KeysApi.period_end]:
-				year = budget[KeysApi.period_end][KeysApi.iso_date].split('-')[0]
-				if KeysApi.value in budget and KeysApi.currency in budget[KeysApi.value]:
-					company = budget[KeysApi.value][KeysApi.currency]
-					budget_value = float(budget[KeysApi.value][KeysApi.text])
+		for transaction in data:
+			if type(transaction) == dict and KeysApi.provider_org in transaction:
+				year = transaction[KeysApi.transaction_date][KeysApi.iso_date].split('-')[0]
+				if KeysApi.value in transaction:
+					company = self.get_company_names(transaction)
+					budget_value = float(transaction[KeysApi.value][KeysApi.text])
 					aid = AidMonetary.objects.filter(year=year, company=company, country=country).first()
 					if aid:
 						aid.add_budget(budget_value)
@@ -57,8 +72,8 @@ class CountryQueries(object):
 	def create_aids_from_country(self, country, data):
 		queries = AidMonetaryQueries()
 		for activity in data[KeysApi.iati_activities]:
-			if KeysApi.iati_activity in activity and KeysApi.budget in activity[KeysApi.iati_activity]:
-				queries.create(country, activity[KeysApi.iati_activity][KeysApi.budget])
+			if KeysApi.iati_activity in activity and KeysApi.transaction in activity[KeysApi.iati_activity]:
+				queries.create(country, activity[KeysApi.iati_activity][KeysApi.transaction])
 
 	def create(self, country, data):
 		country_obj = Country.objects.filter(code=country).first()
@@ -67,16 +82,21 @@ class CountryQueries(object):
 			country_obj.save()
 		self.create_aids_from_country(country_obj, data)
 
+
 class RegisterQueries(object):
 
 	def create(self, country, year):
+		year = str(int(year) + 1)
 		Register.create(country=country, year=year)
+
 
 class UpdateData(object):
 
 	def update(self, country, year_initial, year_end, data):
 		AidMonetaryQueries().delete(year_initial, year_end, country)
 		CountryQueries().create(country, data)
+		Register().create(country, year)
+
 
 
 class ActivitiesData(object):
@@ -97,7 +117,6 @@ class ActivitiesData(object):
 		else:
 			result = json.loads(response.content)
 		return result
-
 
 	def get_data(self, country, year):
 		if self.exist_last_search(country, year):

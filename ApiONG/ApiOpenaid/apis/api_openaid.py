@@ -8,7 +8,7 @@ class ApiOpenaid(object):
 		'Accept': 'application/json'
 	} 
 	DIFF_YEAR = 5
-	LIMIT = 500
+	LIMIT = 1000
 
 	def get_beetween_years(self, year):
 		self.year_end = str(int(year)-1)
@@ -35,6 +35,5 @@ class ApiOpenaid(object):
 	def get_activities(self, code_country, year):
 		session = self.get_session()
 		params = self.get_params(code_country, year)
-		print(params)
 		response = session.get(self.__class__.URL, params=params, headers=self.__class__.HEADERS)
 		return response
