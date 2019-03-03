@@ -8,15 +8,22 @@ class ApiOpenaid(object):
 		'Accept': 'application/json'
 	} 
 	DIFF_YEAR = 5
+	LIMIT = 500
+
+	def get_beetween_years(self, year):
+		self.year_end = str(int(year)-1)
+		self.year_initial = str(int(year)-self.__class__.DIFF_YEAR)
+		return self.year_initial, self.year_end
 
 	def get_params(self, code_country, year):
-		year = int(year)
-		start_date = '{0}-01-01'.format(str(year-self.__class__.DIFF_YEAR))
-		end_date = '{0}-12-31'.format(str(year-1))
+		self.get_beetween_years(year)
+		start_date = '{0}-01-01'.format(self.year_initial)
+		end_date = '{0}-12-31'.format(self.year_end)
 		params ={
 			'recipient-country': code_country,
 			'start-date__gt': start_date,
-			'end-date__lt': end_date
+			'end-date__lt': end_date,
+			'limit': self.__class__.LIMIT
 		}
 		return params
 
@@ -28,5 +35,6 @@ class ApiOpenaid(object):
 	def get_activities(self, code_country, year):
 		session = self.get_session()
 		params = self.get_params(code_country, year)
+		print(params)
 		response = session.get(self.__class__.URL, params=params, headers=self.__class__.HEADERS)
 		return response
