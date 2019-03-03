@@ -7,7 +7,7 @@ class AidMonetary(models.Model):
 	country = models.ForeignKey('CallsRegisters.Country', related_name='aids', on_delete=models.CASCADE)
 
 	class Meta:
-		ordering = ('year', 'budget',)
+		ordering = ('year', '-budget',)
 
 	def add_budget(self, value):
 		self.budget += value

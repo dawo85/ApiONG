@@ -49,7 +49,6 @@ class ActivitiesSerializer(object):
 			result[field] = getattr(self, field).__dict__
 		return result
 
-
 	@property
 	def data(self):
 		result = {}
