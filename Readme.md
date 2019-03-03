@@ -10,14 +10,13 @@
 4. Up docker with the command:
 `$: docker-compose up`
 
-#### How to ejecute the application without docker (Linux)?
+#### How to ejecute tests?
 
 1. Open terminal.
-2. Situate in project path.
-3. Ejecute:
-`$:pip install -r requirements.txt`
-4. Run django in apimusic:
-`$:python -u manage.py runserver 0.0.0.0:8000`
+2. Entry in docker. `$: docker exec -ti apimrnoow_django_1 /bin/bash`
+3. Situate in project root of django: `$ cd /code/ApiONG`
+4. Ejecute command: `$: python manage.py test` 
+
 
 
 #### APIS:
